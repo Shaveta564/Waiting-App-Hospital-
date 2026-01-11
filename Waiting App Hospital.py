@@ -30,7 +30,7 @@ class HospitalApp:
     def register_screen(self):
         self.clear_screen()
         tk.Label(self.root, text="Welcome to Prathima Hospital", font=("Times New Roman",50)).pack(pady=10)
-        tk.Label(self.root,text="REGISTER HERE",font=("New Times Roman",20,"bold")).pack(pady=5)
+        tk.Label(self.root,text="REGISTER HERE",font=("Times New Roman",20,"bold")).pack(pady=5)
         tk.Label(self.root, text="Enter Your Name:",font=("Times New Roman",25,"bold")).pack(pady=20)
         self.name = tk.Entry(self.root,width=20)
         self.name.pack(pady=5)
@@ -50,25 +50,24 @@ class HospitalApp:
         lb1.place(x=50,y=700)
 
     def verification(self):
-        name1= self.name.get()
-        password = self.password.get()
-        phone=self.phone.get()
+        name1= self.name.get().strip()
+        password = self.password.get().strip()
+        phone=self.phone.get().strip()
         details.append({"Name":name1,"Password":password})
         if not(name1 and password and phone):
             messagebox.showerror("Missing Data", "Please fill all the fields.")
             return
-        if not phone.isdigit():
-            messagebox.showerror("Invalid Phone", "Phone number must contain digits only.")
+        if not (phone.isdigit() and len(phone)==10):
+            messagebox.showerror("Invalid number", "Please give a correct phone number.")
             return
-        self.registered_name =name1
-        self.registered_password = password
+        
         messagebox.showinfo("Success","Registration done!!")
         self.first_screen()
     
     def login_screen(self):
         self.clear_screen()
         tk.Label(self.root, text="Welcome to Prathima Hospital", font=("Times New Roman",50)).pack(pady=10)
-        tk.Label(self.root,text="LOGIN HERE",font=("New Times Roman",20,"bold")).pack(pady=40)
+        tk.Label(self.root,text="LOGIN HERE",font=("Times New Roman",20,"bold")).pack(pady=40)
         tk.Label(self.root, text="Enter Your Name:",font=("Times New Roman",25,"bold")).pack(pady=20)
         self.identity = tk.Entry(self.root,width=20)
         self.identity.pack(pady=15)
@@ -99,18 +98,22 @@ class HospitalApp:
         self.clear_screen()
         tk.Label(self.root, text="Prathima Hospital", font=("Times New Roman",50)).pack(pady=10)
         tk.Label(self.root, text=f"Hello {self.username}, Book your Appointment", font=("Times New Roman", 20)).pack(pady=20)
+        self.photo1=tk.PhotoImage(file=r"C:\Users\A Shaveta\Desktop\project1\my_venv\photo2.png")
+        tk.Label(self.root,image=self.photo1).place(x=30,y=100)
+        self.photo2=tk.PhotoImage(file=r"C:\Users\A Shaveta\Desktop\project1\my_venv\photo4.png")
+        tk.Label(self.root,image=self.photo2).place(x=1050,y=250,width=400,height=400)
         tk.Label(self.root,text="Enter Patient's Name:").pack(pady=20)
         self.patient=tk.Entry(self.root)
         self.patient.pack(pady=10)
         tk.Label(self.root, text="Select Department:").pack(pady=20)
-        departments = ["Cardiology", "Surgery", "Oncology", "Ophthalmology", "Radiology"]
+        departments = ["Cardiology", "General Medicine", "Oncology", "Ophthalmology", "Radiology"]
         self.department = ttk.Combobox(self.root, values=departments)
         self.department.pack(pady=10)
         tk.Label(self.root, text="Your Problem:").pack(pady=20)
         self.problem = tk.Entry(self.root,width=20)
         self.problem.pack(pady=10)
         tk.Label(self.root, text="Select Doctor:").pack(pady=20)
-        doctors = ["Dr.Smith - Cardiology", "Dr.Patel - Surgery", "Dr.Johnson - Oncology", "Dr.Sailaja - Ophthalmology", "Dr.Sarvani - Radiology"]
+        doctors = ["Dr.Smith - Cardiology", "Dr.Patel - General Medicine", "Dr.Johnson - Oncology", "Dr.Sailaja - Ophthalmology", "Dr.Sarvani - Radiology"]
         self.doctor = ttk.Combobox(self.root, values=doctors)
         self.doctor.pack(pady=10)
         tk.Label(self.root, text="Appointment Time (HH:MM):").pack(pady=20)
@@ -118,9 +121,9 @@ class HospitalApp:
         self.time_entry.pack(pady=10)
         tk.Button(self.root, text="Pay & Confirm (₹500)", command=self.save_appointment).pack(pady=10)
         lb=tk.Label(self.root,text="Phone Number:040-5960 3636",font=("bold"),bg="yellow")
-        lb.place(x=1200,y=700)
+        lb.place(x=1200,y=750)
         lb1=tk.Label(self.root,text="Timings:09:00AM-09:00PM",font=("bold"),bg="yellow")
-        lb1.place(x=50,y=700)
+        lb1.place(x=50,y=750)
 
     def save_appointment(self):
         name = self.patient.get()
@@ -132,24 +135,22 @@ class HospitalApp:
         if not (name and problem and doctor and time_str and department):
             messagebox.showerror("Missing Data", "Please fill all the fields.")
             return
-        same_time_count = sum(1 for appt in appointments if appt["doctor"] == doctor and appt["time"].strftime("%H:%M") == time_str)
-        original_time = datetime.datetime.strptime(time_str, "%H:%M")
-        adjusted_time = original_time + datetime.timedelta(minutes=15 * same_time_count)
 
+        original_time = datetime.datetime.strptime(time_str, "%H:%M")
+        same_time_count =sum(1 for appt in appointments
+                             if appt["doctor"] == doctor and appt["time1"].strftime("%H:%M") == original_time.strftime("%H:%M"))
+        adjusted_time = original_time + datetime.timedelta(minutes=15 * same_time_count)
         if same_time_count > 0:
             messagebox.showwarning("Time Slot Adjusted", f"Slot already booked. Your new appointment is at {adjusted_time.strftime('%H:%M')}.")
-
-        appointments.append({"name":name,"time1":original_time,"department": department,"problem": problem, "doctor": doctor,"time": adjusted_time})
-
+        appointments.append({"name": name,"time1": original_time,"department": department,"problem": problem,"doctor": doctor,"time": adjusted_time})
         messagebox.showinfo("Success", "Appointment Confirmed. Thank you!")
         self.show_appointments()
-
 
     def show_appointments(self):
         self.clear_screen()
         tk.Label(self.root, text="All Appointments", font=("Arial", 14)).pack(pady=10)
-        tree = ttk.Treeview(self.root, columns=("Name", "Appointment Taken","Department", "Doctor", "Problem","Adjusted time"), show="headings")
-        for col in ("Name", "Appointment Taken","Department", "Doctor", "Problem","Adjusted time"):
+        tree = ttk.Treeview(self.root, columns=("S.No","Name", "Appointment Taken","Department", "Doctor", "Problem","Adjusted time"), show="headings")
+        for col in ("S.No","Name", "Appointment Taken","Department", "Doctor", "Problem","Adjusted time"):
             tree.heading(col, text=col)
             tree.column(col,width=200)
         tree.pack(pady=10)
@@ -159,8 +160,8 @@ class HospitalApp:
         for doc_appts in doctor_appointments.values():
             doc_appts.sort(key=lambda x: x["time"])
         for doctor, doc_appts in doctor_appointments.items():
-            for index, appt in enumerate(doc_appts):
-                tree.insert("", "end", values=(appt["name"],appt["time1"].strftime("%H:%M"),appt["department"],appt["doctor"],appt["problem"],appt["time"].strftime("%H:%M")))
+            for index, appt in enumerate(doc_appts,start=1):
+                tree.insert("", "end",values=(index,appt["name"],appt["time1"].strftime("%H:%M"),appt["department"],appt["doctor"],appt["problem"],appt["time"].strftime("%H:%M")))
         tk.Button(self.root, text="Back to Home", command=self.first_screen).pack(pady=10)
         tk.Button(self.root,text="Back to Appointment Registration",command=self.appointment_screen).pack(pady=10)
         lb=tk.Label(self.root,text="Phone Number:040-5960 3636",font=("bold"),bg="yellow")
@@ -168,10 +169,10 @@ class HospitalApp:
         lb1=tk.Label(self.root,text="Timings:09:00AM-09:00PM",font=("bold"),bg="yellow")
         lb1.place(x=50,y=700)
 
-if __name__ == '__main__':
-    root = tk.Tk()
-    app = HospitalApp(root)
-    root.iconbitmap("C:/Users/A Shaveta/OneDrive/Desktop/project1/my_venv/ee.ico")
-    root.config(bg="lavender")
-    root.mainloop()
+root = tk.Tk()
+app = HospitalApp(root)
+root.iconbitmap(r"C:\Users\A Shaveta\Desktop\project1\my_venv\ee.ico")
+root.config(bg="lavender")
+root.mainloop()
+
     
